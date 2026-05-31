@@ -19,10 +19,10 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Force Install Gradle Wrapper Tools
+    - name: Force Generate App Builder Tools
       run: |
-        npm install -g gradle-to-js || true
         gradle wrapper --gradle-version 8.2
+        chmod +x gradlew
 
     - name: Compile and Build Android APK
       run: ./gradlew assembleDebug --no-daemon
