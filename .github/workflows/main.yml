@@ -19,17 +19,120 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Set up Gradle Build Tool Environment
+    - name: Smart Code Repair Tool
+      run: |
+        # 1. Clear any broken files sitting outside folders
+        rm -f build.gradle settings.gradle
+
+        # 2. Re-create the master connection manager file
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "BharatPilot"
+        include ':app'
+        EOF
+
+        # 3. Re-create the main root project configuration sheet
+        cat << 'EOF' > build.gradle
+        plugins {
+            id 'com.android.application' version '8.2.0' apply false
+            id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+        }
+        EOF
+
+        # 4. Make sure the inner sub-folders exist correctly
+        mkdir -p app/src/main/java/com/bharatpilot/app
+        mkdir -p app/src/main/res/xml
+        mkdir -p app/src/main/res/values
+
+        # 5. Move any loose code files into their correct native folder paths
+        mv -f MainActivity.kt app/src/main/java/com/bharatpilot/app/MainActivity.kt || true
+        mv -f VoiceAutomationService.kt app/src/main/java/com/bharatpilot/app/VoiceAutomationService.kt || true
+        mv -f AndroidManifest.xml app/src/main/AndroidManifest.xml || true
+
+        # 6. Re-write the internal app-level compilation rules cleanly
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
+
+        android {
+            namespace 'com.bharatpilot.app'
+            compileSdk 34
+
+            defaultConfig {
+                applicationId "com.bharatpilot.app"
+                minSdk 26
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+
+            buildTypes {
+                release {
+                    minifyEnabled false
+                    proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+            }
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+            kotlinOptions {
+                jvmTarget = '1.8'
+            }
+        }
+
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.10.0'
+        }
+        EOF
+
+        # 7. Add the hidden privacy resource description files automatically
+        cat << 'EOF' > app/src/main/res/values/strings.xml
+        <resources>
+            <string name="app_name">Bharat Pilot</string>
+            <string name="accessibility_description">Bharat Pilot processes voice scripts and local screen automation locally. No keystrokes or layout elements are transmitted outside your device.</string>
+        </resources>
+        EOF
+
+        # 8. Add the hidden accessibility system configuration files automatically
+        cat << 'EOF' > app/src/main/res/xml/accessibility_service_config.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <accessibility-service xmlns:android="http://android.com"
+            android:accessibilityEventTypes="typeAllMask"
+            android:accessibilityFeedbackType="feedbackGeneric"
+            android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows|flagReportViewIds"
+            android:canRetrieveWindowContent="true"
+            android:canPerformGestures="true"
+            android:description="@string/accessibility_description" />
+        EOF
+
+    - name: Set up Setup-Gradle Automation Action
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: 8.2
 
     - name: Compile and Build Android APK File
-     run: gradle assemble --no-daemon
+      run: gradle :app:assembleDebug --no-daemon
 
     - name: Upload Finished App Installer
       uses: actions/upload-artifact@v4
       with:
         name: Bharat-AI-Pilot-App
-        path: "**/build/outputs/apk/debug/*.apk"
-
+        path: "app/build/outputs/apk/debug/*.apk"
