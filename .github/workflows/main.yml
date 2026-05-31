@@ -25,7 +25,7 @@ jobs:
         gradle-version: 8.2
 
     - name: Compile and Build Android APK File
-      run: gradle assembleDebug --no-daemon
+     run: gradle assemble --no-daemon
 
     - name: Upload Finished App Installer
       uses: actions/upload-artifact@v4
