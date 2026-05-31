@@ -5,6 +5,11 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  # Force GitHub to bypass version deprecation rules
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,10 +26,10 @@ jobs:
 
     - name: Smart Code Repair Tool
       run: |
-        # 1. Clear any broken files sitting outside folders
+        # Clear out previous surface-level workspace locks
         rm -f build.gradle settings.gradle
 
-        # 2. Re-create the master connection manager file
+        # Re-build clean root connection tracks
         cat << 'EOF' > settings.gradle
         pluginManagement {
             repositories {
@@ -44,7 +49,7 @@ jobs:
         include ':app'
         EOF
 
-        # 3. Re-create the main root project configuration sheet
+        # Re-build clean root application rules
         cat << 'EOF' > build.gradle
         plugins {
             id 'com.android.application' version '8.2.0' apply false
@@ -52,17 +57,19 @@ jobs:
         }
         EOF
 
-        # 4. Make sure the inner sub-folders exist correctly
+        # Guarantee full operational folder structures
         mkdir -p app/src/main/java/com/bharatpilot/app
         mkdir -p app/src/main/res/xml
         mkdir -p app/src/main/res/values
 
-        # 5. Move any loose code files into their correct native folder paths
+        # Relocate user files safely if they are sitting on the surface layout
         mv -f MainActivity.kt app/src/main/java/com/bharatpilot/app/MainActivity.kt || true
         mv -f VoiceAutomationService.kt app/src/main/java/com/bharatpilot/app/VoiceAutomationService.kt || true
         mv -f AndroidManifest.xml app/src/main/AndroidManifest.xml || true
+        mv -f AppConfig.kt app/src/main/java/com/bharatpilot/app/AppConfig.kt || true
+        mv -f BharatPilotApplication.kt app/src/main/java/com/bharatpilot/app/BharatPilotApplication.kt || true
 
-        # 6. Re-write the internal app-level compilation rules cleanly
+        # Re-compile app build targets cleanly
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -103,15 +110,15 @@ jobs:
         }
         EOF
 
-        # 7. Add the hidden privacy resource description files automatically
+        # Re-write resource layout strings
         cat << 'EOF' > app/src/main/res/values/strings.xml
         <resources>
             <string name="app_name">Bharat Pilot</string>
-            <string name="accessibility_description">Bharat Pilot processes voice scripts and local screen automation locally. No keystrokes or layout elements are transmitted outside your device.</string>
+            <string name="accessibility_description">Bharat Pilot runs actions inside device memory. No data leaves the terminal wrapper.</string>
         </resources>
         EOF
 
-        # 8. Add the hidden accessibility system configuration files automatically
+        # Re-write configuration setup bounds
         cat << 'EOF' > app/src/main/res/xml/accessibility_service_config.xml
         <?xml version="1.0" encoding="utf-8"?>
         <accessibility-service xmlns:android="http://android.com"
